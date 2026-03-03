@@ -1,17 +1,7 @@
 #include <Arduino.h>
 #include <CodeBaseClass.h>
 
-// Pins, blocks, pins 7-9 will be on a multiplexer for extra pins
-const uint8_t pin1 = A5;
-const uint8_t pin2 = A4;
-const uint8_t pin3 = A3;
-const uint8_t pin4 = A2;
-const uint8_t pin5 = A1;
-const uint8_t pin6 = A0;
 
-// const uint8_t pin7 = x;
-// const uint8_t pin8 = y;
-// const uint8_t pin9 = z;
 
 // Digital pins for turning on/off the leds
 const uint8_t Red_LED = 2;
@@ -77,39 +67,42 @@ public:
 codeBlockLED returnCodeBlockType(int adc) const override
 {
     // ON blocks
-    if (adc <= 105)
-        return Block_RedLED_ON;
+    if (adc <= 45)
+        return Block_RedLED_ON;      // 100Ω → ADC ~7
 
-    if (adc <= 200)
-        return Block_YellowLED_ON;
+    if (adc <= 125)
+        return Block_YellowLED_ON;   // 1kΩ → ADC ~90
 
-    if (adc <= 258)
-        return Block_GreenLED_ON;
+    if (adc <= 260)
+        return Block_GreenLED_ON;    // 2kΩ → ADC ~168
 
 
     // OFF blocks
-    if (adc <= 340)
-        return Block_RedLED_OFF;
+    if (adc <= 450)
+        return Block_RedLED_OFF;     // 5.7kΩ → ADC ~371
 
-    if (adc <= 380)
-        return Block_YellowLED_OFF;
+    if (adc <= 575)
+        return Block_YellowLED_OFF;  // 11.5kΩ → ADC ~543
 
-    if (adc <= 420)
-        return Block_GreenLED_OFF;
+    if (adc <= 640)
+        return Block_GreenLED_OFF;   // 14.7kΩ → ADC ~608
 
 
     // Delay blocks
-    if (adc <= 455)
-        return Block_Delay1s;
+    if (adc <= 725)
+        return Block_Delay1s;        // 20kΩ → ADC ~680
 
-    if (adc <= 490)
-        return Block_Delay2s;
+    if (adc <= 835)
+        return Block_Delay2s;        // 32kΩ → ADC ~775
 
-    if (adc <= 510)
-        return Block_Delay3s;
+    if (adc <= 935)
+        return Block_Delay3s;        // 69kΩ → ADC ~898
 
 
+    if(adc>=1000)
     return Block_Empty;
+
+    return Block_Empty;              // No block
 }
 
 

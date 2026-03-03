@@ -1,6 +1,20 @@
 #pragma once
 #include <Arduino.h>
 
+// Pins, blocks, pins 7-9 will be on a multiplexer for extra pins (its flipped now, so the last pin is the first)
+const uint8_t pin1 = A5;
+const uint8_t pin2 = A4;
+const uint8_t pin3 = A3;
+const uint8_t pin4 = A2;
+const uint8_t pin5 = A1;
+const uint8_t pin6 = A0;
+
+// const uint8_t pin7 = x;
+// const uint8_t pin8 = y;
+// const uint8_t pin9 = z;
+
+
+
 // Gives a way less noisy output for the adc instead of analogRead
 inline int readStableADC(uint8_t pin)
 {
@@ -47,10 +61,7 @@ public:
         }
     }
 
-    void clearBlocks()
-    {
-        currentActiveBlocks = 0;
-    }
+    void clearBlocks(){ currentActiveBlocks = 0;}
 
     // Method that runs the final code.
     void executeBlocks()
