@@ -4,9 +4,9 @@
 
 
 // Digital pins for turning on/off the leds
-const uint8_t Red_LED = 2;
-const uint8_t Yellow_LED = 3;
-const uint8_t Green_LED = 4;
+const uint8_t Red_LED = 9;
+const uint8_t Yellow_LED = 10;
+const uint8_t Green_LED = 11;
 
 enum codeBlockLED
 {
@@ -111,15 +111,19 @@ codeBlockLED returnCodeBlockType(int adc) const override
 
         clearBlocks();
 
+        digitalWrite(Red_LED, LOW);
+        digitalWrite(Yellow_LED, LOW);
+        digitalWrite(Green_LED, LOW);
+
         addBlock(pin1);
         addBlock(pin2);
         addBlock(pin3);
         addBlock(pin4);
         addBlock(pin5);
-        addBlock(pin6);
-        // addBlock(pin7);
-        // addBlock(pin8);
-        // addBlock(pin9);
+        addBlockFromMultiplexer(0); // block6
+        addBlockFromMultiplexer(1); // block7
+        addBlockFromMultiplexer(2); // block8
+        addBlockFromMultiplexer(3); // block9
     }
 
     void executeCodeFromCodeBlock(codeBlockLED codeBlock) override

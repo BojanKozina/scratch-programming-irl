@@ -1,18 +1,47 @@
 #pragma once
 #include <Arduino.h>
 
-// Pins, blocks, pins 7-9 will be on a multiplexer for extra pins (its flipped now, so the last pin is the first)
+// Direct ADC block pins.
+// UNO has only A0-A5, so A0 is reserved as multiplexer SIG.
 const uint8_t pin1 = A5;
 const uint8_t pin2 = A4;
 const uint8_t pin3 = A3;
 const uint8_t pin4 = A2;
 const uint8_t pin5 = A1;
-const uint8_t pin6 = A0;
+// Block 6-9 are read from multiplexer channels.
 
-// const uint8_t pin7 = x;
-// const uint8_t pin8 = y;
-// const uint8_t pin9 = z;
+// 16-channel multiplexer (74HC4067 compatible) pins
+const uint8_t MUX_S0_PIN = 5;
+const uint8_t MUX_S1_PIN = 6;
+const uint8_t MUX_S2_PIN = 7;
+const uint8_t MUX_S3_PIN = 8;
+const uint8_t MUX_SIG_PIN = A0;
 
+inline int readStableADC(uint8_t pin);
+
+
+inline void initMultiplexerPins()
+{
+    pinMode(MUX_S0_PIN, OUTPUT);
+    pinMode(MUX_S1_PIN, OUTPUT);
+    pinMode(MUX_S2_PIN, OUTPUT);
+    pinMode(MUX_S3_PIN, OUTPUT);
+}
+
+inline void selectMultiplexerChannel(uint8_t channel)
+{
+    digitalWrite(MUX_S0_PIN, channel & 0x01);
+    digitalWrite(MUX_S1_PIN, (channel >> 1) & 0x01);
+    digitalWrite(MUX_S2_PIN, (channel >> 2) & 0x01);
+    digitalWrite(MUX_S3_PIN, (channel >> 3) & 0x01);
+}
+
+inline int readMultiplexerStableADC(uint8_t channel)
+{
+    selectMultiplexerChannel(channel);
+    delayMicroseconds(50);
+    return readStableADC(MUX_SIG_PIN);
+}
 
 
 // Gives a way less noisy output for the adc instead of analogRead
@@ -61,7 +90,28 @@ public:
         }
     }
 
-    void clearBlocks(){ currentActiveBlocks = 0;}
+    void addBlockFromMultiplexer(uint8_t channel)
+    {
+        if (currentActiveBlocks >= maxBlocks)
+            return;
+
+        int adc = readMultiplexerStableADC(channel);
+        codeBlockTemplate cb = returnCodeBlockType(adc);
+
+        if (cb != EmptyBlock)
+        {
+            codeBlocks[currentActiveBlocks] = cb;
+            currentActiveBlocks++;
+        }
+    }
+
+    void clearBlocks()
+    {
+        for (uint8_t i = 0; i < maxBlocks; i++)
+            codeBlocks[i] = EmptyBlock;
+
+        currentActiveBlocks = 0;
+    }
 
     // Method that runs the final code.
     void executeBlocks()
