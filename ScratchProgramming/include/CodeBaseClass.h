@@ -135,5 +135,18 @@ public:
         Serial.println(currentActiveBlocks);
     }
 
+    uint8_t getCurrentActiveBlocks() const
+    {
+        return currentActiveBlocks;
+    }
+
+    codeBlockTemplate getBlockAt(uint8_t index) const
+    {
+        if (index >= currentActiveBlocks)
+            return EmptyBlock;
+
+        return codeBlocks[index];
+    }
+
     virtual ~CodeBase() = default;
-};
+}; 

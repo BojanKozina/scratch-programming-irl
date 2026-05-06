@@ -7,6 +7,7 @@
 const uint8_t Red_LED = 9;
 const uint8_t Yellow_LED = 10;
 const uint8_t Green_LED = 11;
+const uint8_t Buzzer_PIN = 12;
 
 enum codeBlockLED
 {
@@ -15,15 +16,15 @@ enum codeBlockLED
     Block_YellowLED_ON,
     Block_GreenLED_ON,
 
-    // Led off blocks
-    Block_RedLED_OFF,
-    Block_YellowLED_OFF,
-    Block_GreenLED_OFF,
+    // 2-blink blocks
+    Block_RedLED_Blink2,
+    Block_YellowLED_Blink2,
+    Block_GreenLED_Blink2,
 
-    // Delay blocks
-    Block_Delay1s,
-    Block_Delay2s,
-    Block_Delay3s,
+    // 3-blink blocks
+    Block_RedLED_Blink3,
+    Block_YellowLED_Blink3,
+    Block_GreenLED_Blink3,
 
     Block_Empty
 };
@@ -31,6 +32,41 @@ enum codeBlockLED
 class CodeLED : public CodeBase<codeBlockLED, Block_Empty, 9>
 {
 public:
+    void blinkOutput(uint8_t pin, uint8_t times, uint16_t frequency)
+    {
+        for (uint8_t i = 0; i < times; i++)
+        {
+            tone(Buzzer_PIN, frequency);
+            digitalWrite(pin, HIGH);
+            delay(85);
+            digitalWrite(pin, LOW);
+            noTone(Buzzer_PIN);
+
+            if (i + 1 < times)
+                delay(55);
+        }
+    }
+
+    void blinkAllOutputs(uint8_t times)
+    {
+        for (uint8_t i = 0; i < times; i++)
+        {
+            digitalWrite(Red_LED, HIGH);
+            digitalWrite(Yellow_LED, HIGH);
+            digitalWrite(Green_LED, HIGH);
+            digitalWrite(Buzzer_PIN, HIGH);
+            delay(250);
+
+            digitalWrite(Red_LED, LOW);
+            digitalWrite(Yellow_LED, LOW);
+            digitalWrite(Green_LED, LOW);
+            digitalWrite(Buzzer_PIN, LOW);
+
+            if (i + 1 < times)
+                delay(250);
+        }
+    }
+
     String codeBlockToString(codeBlockLED codeBlock) const override
     {
         switch (codeBlock)
@@ -43,21 +79,21 @@ public:
         case Block_GreenLED_ON:
             return "Block_GreenLED_ON";
 
-        // OFF Blocks
-        case Block_RedLED_OFF:
-            return "Block_RedLED_OFF";
-        case Block_YellowLED_OFF:
-            return "Block_YellowLED_OFF";
-        case Block_GreenLED_OFF:
-            return "Block_GreenLED_OFF";
+        // 2-blink Blocks
+        case Block_RedLED_Blink2:
+            return "Block_RedLED_Blink2";
+        case Block_YellowLED_Blink2:
+            return "Block_YellowLED_Blink2";
+        case Block_GreenLED_Blink2:
+            return "Block_GreenLED_Blink2";
 
-        // Delay Blocks
-        case Block_Delay1s:
-            return "Block_Delay1s";
-        case Block_Delay2s:
-            return "Block_Delay2s";
-        case Block_Delay3s:
-            return "Block_Delay3s";
+        // 3-blink Blocks
+        case Block_RedLED_Blink3:
+            return "Block_RedLED_Blink3";
+        case Block_YellowLED_Blink3:
+            return "Block_YellowLED_Blink3";
+        case Block_GreenLED_Blink3:
+            return "Block_GreenLED_Blink3";
 
         default:
             return "Block_Empty";
@@ -77,26 +113,26 @@ codeBlockLED returnCodeBlockType(int adc) const override
         return Block_GreenLED_ON;    // 2kΩ → ADC ~168
 
 
-    // OFF blocks
+    // 2-blink blocks
     if (adc <= 450)
-        return Block_RedLED_OFF;     // 5.7kΩ → ADC ~371
+        return Block_RedLED_Blink2;     // 5.7kΩ → ADC ~371
 
     if (adc <= 575)
-        return Block_YellowLED_OFF;  // 11.5kΩ → ADC ~543
+        return Block_YellowLED_Blink2;  // 11.5kΩ → ADC ~543
 
     if (adc <= 640)
-        return Block_GreenLED_OFF;   // 14.7kΩ → ADC ~608
+        return Block_GreenLED_Blink2;   // 14.7kΩ → ADC ~608
 
 
-    // Delay blocks
+    // 3-blink blocks
     if (adc <= 725)
-        return Block_Delay1s;        // 20kΩ → ADC ~680
+        return Block_RedLED_Blink3;        // 20kΩ → ADC ~680
 
     if (adc <= 835)
-        return Block_Delay2s;        // 32kΩ → ADC ~775
+        return Block_YellowLED_Blink3;        // 32kΩ → ADC ~775
 
     if (adc <= 935)
-        return Block_Delay3s;        // 69kΩ → ADC ~898
+        return Block_GreenLED_Blink3;        // 69kΩ → ADC ~898
 
 
     if(adc>=1000)
@@ -140,24 +176,24 @@ codeBlockLED returnCodeBlockType(int adc) const override
             digitalWrite(Green_LED, HIGH);
             break;
 
-        case Block_RedLED_OFF:
-            digitalWrite(Red_LED, LOW);
+        case Block_RedLED_Blink2:
+            blinkOutput(Red_LED, 2, 440);
             break;
-        case Block_YellowLED_OFF:
-            digitalWrite(Yellow_LED, LOW);
+        case Block_YellowLED_Blink2:
+            blinkOutput(Yellow_LED, 2, 523);
             break;
-        case Block_GreenLED_OFF:
-            digitalWrite(Green_LED, LOW);
+        case Block_GreenLED_Blink2:
+            blinkOutput(Green_LED, 2, 659);
             break;
 
-        case Block_Delay1s:
-            delay(1000);
+        case Block_RedLED_Blink3:
+            blinkOutput(Red_LED, 3, 440);
             break;
-        case Block_Delay2s:
-            delay(2000);
+        case Block_YellowLED_Blink3:
+            blinkOutput(Yellow_LED, 3, 523);
             break;
-        case Block_Delay3s:
-            delay(3000);
+        case Block_GreenLED_Blink3:
+            blinkOutput(Green_LED, 3, 659);
             break;
 
         default:
